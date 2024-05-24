@@ -8,6 +8,7 @@ from sumy.summarizers.lsa import LsaSummarizer
 import time
 
 nltk.download('stopwords')
+nltk.download('punkt')
 nltk.data.path.append('/path/to/nltk_data')
 
 # Function to summarize text
