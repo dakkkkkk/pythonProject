@@ -57,7 +57,7 @@ st.markdown(
     """
     <style>
         body {
-            background-color: #F2F4F6;  /* Light Gray */
+            background-color: #FFFFFF;  /* Light Gray */
             font-family: Arial, sans-serif;
         }
         .st-eb {
