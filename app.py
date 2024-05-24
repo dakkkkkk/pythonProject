@@ -1,18 +1,32 @@
 import streamlit as st
 import nltk
-
+import re
 from rake_nltk import Rake
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
+from sumy.nlp.stemmers import Stemmer
 from sumy.summarizers.lsa import LsaSummarizer
 import time
 
+# Download NLTK resources
 nltk.download('stopwords')
 nltk.download('punkt')
-nltk.data.path.append('/path/to/nltk_data')
+
+
+# Function to preprocess text
+def preprocess_text(text):
+    # Remove URLs
+    text = re.sub(r'http\S+', '', text)
+    # Remove special characters except periods
+    text = re.sub(r'[^a-zA-Z0-9.\s]', '', text)
+    return text
+
 
 # Function to summarize text
 def summarize_text(input_text):
+    # Preprocess input text
+    input_text = preprocess_text(input_text)
+
     # Extract keywords using RAKE
     r = Rake()
     r.extract_keywords_from_text(input_text)
@@ -22,16 +36,18 @@ def summarize_text(input_text):
     parser = PlaintextParser.from_string(input_text, Tokenizer("english"))
 
     # Create an LSA summarizer
-    summarizer = LsaSummarizer()
+    stemmer = Stemmer("english")
+    summarizer = LsaSummarizer(stemmer)
 
     # Generate the summary
-    summary = summarizer(parser.document, sentences_count=2)  # Always summarize into 3 sentences
+    summary = summarizer(parser.document, sentences_count=2)  # Always summarize into 2 sentences
 
     return summary, extracted_keywords
 
+
 # Set page title and favicon
 st.set_page_config(
-    page_title="Text Summarizer by Allen Tiempo & Roelan Amerila",
+    page_title="Text Summarizer",
     page_icon=":clipboard:",
     layout="wide"
 )
