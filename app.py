@@ -1,9 +1,14 @@
 import streamlit as st
+import nltk
+
 from rake_nltk import Rake
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
 import time
+
+nltk.download('stopwords')
+nltk.data.path.append('/path/to/nltk_data')
 
 # Function to summarize text
 def summarize_text(input_text):
