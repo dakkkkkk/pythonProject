@@ -25,7 +25,7 @@ def summarize_text(input_text):
     summarizer = LsaSummarizer()
 
     # Generate the summary
-    summary = summarizer(parser.document, sentences_count=3)  # Always summarize into 3 sentences
+    summary = summarizer(parser.document, sentences_count=2)  # Always summarize into 3 sentences
 
     return summary, extracted_keywords
 
