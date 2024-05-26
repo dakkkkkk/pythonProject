@@ -1,92 +1,76 @@
 import streamlit as st
-import nltk
-import re
-from rake_nltk import Rake
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.nlp.stemmers import Stemmer
-from sumy.summarizers.lsa import LsaSummarizer
-import time
+from googletrans import Translator
 
-# Download NLTK resources
-nltk.download('stopwords')
-nltk.download('punkt')
+# Function to translate text
+def translate_text(text, source_language, target_language):
+    """
+    Translate text from one language to another.
 
+    Args:
+    text (str): The text to be translated.
+    source_language (str): The source language code.
+    target_language (str): The target language code.
 
-# Function to preprocess text
-def preprocess_text(text):
-    # Remove URLs
-    text = re.sub(r'http\S+', '', text)
-    # Remove special characters except periods
-    text = re.sub(r'[^a-zA-Z0-9.\s]', '', text)
-    return text
-
-
-# Function to summarize text
-def summarize_text(input_text):
-    # Preprocess input text
-    input_text = preprocess_text(input_text)
-
-    # Extract keywords using RAKE
-    r = Rake()
-    r.extract_keywords_from_text(input_text)
-    extracted_keywords = r.get_ranked_phrases_with_scores()[:5]  # Get top 5 ranked phrases
-
-    # Parse the input text
-    parser = PlaintextParser.from_string(input_text, Tokenizer("english"))
-
-    # Create an LSA summarizer
-    stemmer = Stemmer("english")
-    summarizer = LsaSummarizer(stemmer)
-
-    # Generate the summary
-    summary = summarizer(parser.document, sentences_count=2)  # Always summarize into 2 sentences
-
-    return summary, extracted_keywords
-
+    Returns:
+    str: Translated text.
+    """
+    translator = Translator()
+    translated_text = translator.translate(text, src=source_language, dest=target_language)
+    return translated_text.text
 
 # Set page title and favicon
 st.set_page_config(
-    page_title="Text Summarizer",
+    page_title="Text Translator",
     page_icon=":clipboard:",
     layout="wide"
 )
 
-# Custom CSS styles with colorful background and text colors
+# Custom CSS styles to mimic the provided design
 st.markdown(
     """
     <style>
-        body {
-            background-color: #FFFFFF;  /* Light Gray */
-            font-family: Arial, sans-serif;
+        .main {
+            background-color: #f8f9fa;
+            padding: 20px;
         }
-        .st-eb {
-            background-color: #FFFFFF;  /* White */
+        .container {
+            background-color: #ffffff;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: auto;
+            max-width: 800px;
         }
-        .st-el {
-            border-radius: 10px;
-        }
-        .st-at {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2F4F4F;  /* Dark Slate Gray */
-        }
-        .summary-container {
+        .translation-container {
             margin-top: 20px;
             padding: 20px;
             background-color: #FDF5E6;  /* Old Lace */
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .keywords-container {
+        .stButton button {
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        .translated-text-box {
             margin-top: 20px;
-            padding: 20px;
-            background-color: #FFF8DC;  /* Cornsilk */
-            border-radius: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #ffffff;  /* White */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .selectbox-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .selectbox-container div {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .selectbox-container div:last-child {
+            margin-right: 0;
         }
     </style>
     """,
@@ -94,45 +78,31 @@ st.markdown(
 )
 
 # Title and description with colorful text
-st.title("Text Summarizer")
-st.markdown("Summarize your text with ease!", unsafe_allow_html=True)
+st.title("Text Translator")
+st.markdown("Translate your text with ease!", unsafe_allow_html=True)
+
+# Language selection
+st.markdown('<div class="selectbox-container">', unsafe_allow_html=True)
+source_language = st.selectbox("Source Language", ["English", "Spanish", "French", "Tagalog"], index=0, key="source_lang")
+target_language = st.selectbox("Target Language", ["Spanish", "English", "French", "Tagalog"], index=1, key="target_lang")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Text input area
-input_text = st.text_area("Enter your text here:", height=200)
+input_text = st.text_area("Enter text:", height=200)
 
-# Summarize button with Dodger Blue color
-if st.button("Summarize", help="Click to summarize"):
+# Translate button
+if st.button("Translate", help="Click to translate"):
     if input_text:
-        # Display loading message and progress bar
-        progress_bar = st.progress(0)
-        status_text = st.text("Summarizing...")
+        # Translate the text
+        language_codes = {"English": "en", "Spanish": "es", "French": "fr", "Tagalog": "tl"}
+        source_lang_code = language_codes[source_language]
+        target_lang_code = language_codes[target_language]
 
-        # Call the summarize_text function
-        summary, extracted_keywords = summarize_text(input_text)
+        translated_text = translate_text(input_text, source_lang_code, target_lang_code)
 
-        # Simulate progress with time.sleep() and update progress bar
-        for percent_complete in range(1, 101):
-            time.sleep(0.01)
-            progress_bar.progress(percent_complete)
-
-        # Display summary container
-        status_text.text("Done")
-        st.markdown("<div class='summary-container'><h3>Summary:</h3>", unsafe_allow_html=True)
-        for sentence in summary:
-            st.write(sentence)
+        # Display translated text container
+        st.markdown("<div class='translation-container'><h3>Translated Text:</h3>", unsafe_allow_html=True)
+        st.markdown(f"<div class='translated-text-box'>{translated_text}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
-
-        # Display keywords container
-        st.markdown("<div class='keywords-container'><h3>Extracted Keywords:</h3>", unsafe_allow_html=True)
-        keywords_table = "<table><tr><th>Keyword</th><th>Score</th></tr>"
-        for score, phrase in extracted_keywords:
-            keywords_table += f"<tr><td>{phrase}</td><td>{score}</td></tr>"
-        keywords_table += "</table>"
-        st.markdown(keywords_table, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        # Remove loading message and progress bar
-        status_text.empty()
-        progress_bar.empty()
     else:
-        st.warning("Please enter some text to summarize.")
+        st.warning("Please enter some text to translate.")
